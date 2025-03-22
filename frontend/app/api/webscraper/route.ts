@@ -1,129 +1,245 @@
 import { NextRequest, NextResponse } from 'next/server';
+import OpenAI from 'openai';
+import axios from 'axios';
 
-// Mock data for property analysis
-const mockPropertyData = {
-  propertyAddress: '123 Main St, San Francisco, CA 94105',
+// Initialize OpenAI client (for AI scoring)
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || '', // Add your API key in .env.local file
+});
+
+// Define the URL for our scraper service
+const SCRAPER_SERVICE_URL = process.env.SCRAPER_SERVICE_URL || 'http://localhost:3001';
+
+// Mock data for property analysis for Spanish properties (fallback)
+const mockSpanishPropertyData = {
+  propertyAddress: 'Calle Gran Vía 28, Madrid, España',
   marketTrends: {
     priceHistory: [
-      { date: '2023-01', price: 980000 },
-      { date: '2023-04', price: 995000 },
-      { date: '2023-07', price: 1050000 },
-      { date: '2023-10', price: 1080000 },
-      { date: '2024-01', price: 1120000 },
-      { date: '2024-04', price: 1150000 },
+      { date: '2023-01', price: 380000 },
+      { date: '2023-04', price: 395000 },
+      { date: '2023-07', price: 410000 },
+      { date: '2023-10', price: 425000 },
+      { date: '2024-01', price: 440000 },
+      { date: '2024-04', price: 450000 },
     ],
-    rentalYield: 5.8,
-    areaGrowth: 8.2,
+    rentalYield: 5.2,
+    areaGrowth: 4.8,
     similarProperties: [
       {
-        address: '125 Main St',
-        price: 1160000,
-        sqft: 1850,
-        pricePerSqft: 627
+        address: 'Calle Gran Vía 30',
+        price: 465000,
+        sqft: 95,
+        pricePerSqft: 4895
       },
       {
-        address: '101 Park Ave',
-        price: 1095000,
-        sqft: 1780,
-        pricePerSqft: 615
+        address: 'Calle Princesa 15',
+        price: 445000,
+        sqft: 90,
+        pricePerSqft: 4944
       },
       {
-        address: '45 Market St',
-        price: 1210000,
-        sqft: 1900,
-        pricePerSqft: 637
+        address: 'Plaza España 4',
+        price: 490000,
+        sqft: 100,
+        pricePerSqft: 4900
       }
     ]
   },
   locationAnalysis: {
-    walkScore: 88,
-    transitScore: 92,
+    walkScore: 95,
+    transitScore: 98,
     crimeRate: 'Low',
     schools: [
-      { name: 'Lincoln Elementary', rating: 8.4, distance: 0.5 },
-      { name: 'Washington Middle School', rating: 7.9, distance: 0.8 },
-      { name: 'Jefferson High', rating: 8.2, distance: 1.2 }
+      { name: 'Colegio San Isidro', rating: 8.2, distance: 0.5 },
+      { name: 'IES Lope de Vega', rating: 7.8, distance: 0.7 },
+      { name: 'Colegio Santa María', rating: 8.5, distance: 1.1 }
     ],
     amenities: {
-      restaurants: 24,
-      shopping: 18,
-      parks: 4,
-      healthcare: 6
+      restaurants: 35,
+      shopping: 28,
+      parks: 3,
+      healthcare: 8
     }
   },
   financialMetrics: {
-    purchasePrice: 1150000,
-    estimatedMonthlyRent: 5550,
-    annualRentalIncome: 66600,
+    purchasePrice: 450000,
+    estimatedMonthlyRent: 1950,
+    annualRentalIncome: 23400,
     expenses: {
-      propertyTax: 12650,
-      insurance: 5800,
-      maintenance: 6900,
-      managementFees: 6660
+      propertyTax: 1800,
+      insurance: 950,
+      maintenance: 2700,
+      managementFees: 2340
     },
-    netOperatingIncome: 34590,
-    capRate: 3.01,
-    cashOnCashReturn: 5.95,
-    breakEvenOccupancy: 67,
-    appreciationForecast: 4.8
+    netOperatingIncome: 15610,
+    capRate: 3.47,
+    cashOnCashReturn: 5.82,
+    breakEvenOccupancy: 65,
+    appreciationForecast: 3.9
   },
   riskAssessment: {
     overall: 'Low',
-    vacancyRisk: 'Low',
-    maintenanceRisk: 'Medium',
-    regulatoryRisk: 'Low',
-    marketVolatilityRisk: 'Medium',
-    score: 82
+    vacancyRisk: 'Very Low',
+    maintenanceRisk: 'Low',
+    regulatoryRisk: 'Medium',
+    marketVolatilityRisk: 'Low',
+    score: 85
   }
 };
 
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const propertyAddress = searchParams.get('address');
-  
-  // In a real implementation, this would call an actual web scraping service
-  // For now, return mock data with a slight delay to simulate processing
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // Return the mock data as JSON response
-  return NextResponse.json({
-    success: true,
-    message: 'Property analysis completed',
-    data: {
-      ...mockPropertyData,
-      propertyAddress: propertyAddress || mockPropertyData.propertyAddress,
-      analysisDate: new Date().toISOString(),
-      atlasScore: 85
+/**
+ * Analyze property data using our real scraper service
+ * @param url - The property URL
+ * @param platform - The platform (idealista, fotocasa, habitaclia)
+ * @param useMockData - Whether to use mock data
+ * @returns Property analysis data
+ */
+async function analyzePropertyWithScraperService(url: string, platform: string, useMockData: boolean = false) {
+  try {
+    // Call our dedicated scraper service
+    const response = await axios.post(`${SCRAPER_SERVICE_URL}/api/property-analysis`, {
+      url,
+      platform,
+      useMockData
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 60000 // 60 second timeout for scraping
+    });
+    
+    return response.data;
+  } catch (error: any) {
+    console.error('Error calling scraper service:', error.message);
+    
+    // If the scraper service is unavailable, use fallback mode
+    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || error.response?.status >= 500) {
+      console.warn('Scraper service unavailable, using fallback mode');
+      return fallbackAnalysis(url, platform);
     }
-  });
+    
+    throw error;
+  }
+}
+
+/**
+ * Fallback analysis when scraper service is unavailable
+ */
+async function fallbackAnalysis(url: string, platform: string) {
+  console.log('Using fallback analysis with mock data');
+  
+  // Use the mock data with some adjustments based on platform
+  const mockData = {
+    ...mockSpanishPropertyData,
+    propertyAddress: `${platform.charAt(0).toUpperCase() + platform.slice(1)} Property, ${url.includes('madrid') ? 'Madrid' : url.includes('barcelona') ? 'Barcelona' : 'España'}`,
+    financialMetrics: {
+      ...mockSpanishPropertyData.financialMetrics,
+      // Adjust the price based on the platform for variety
+      purchasePrice: platform === 'idealista' ? 450000 : platform === 'fotocasa' ? 395000 : 420000,
+    }
+  };
+  
+  // Call OpenAI to analyze if available
+  let aiAnalysis = {
+    score: 85,
+    analysis: "This is a mock analysis using fallback data."
+  };
+  
+  if (process.env.OPENAI_API_KEY) {
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a real estate investment analysis AI. Analyze the property data and provide an investment score from 0-100 based on rental yield, location quality, and risk assessment."
+          },
+          {
+            role: "user",
+            content: `Analyze this Spanish property as an investment:\n${JSON.stringify(mockData, null, 2)}`
+          }
+        ],
+        temperature: 0.5,
+        max_tokens: 500,
+      });
+      
+      const aiResponse = response.choices[0]?.message?.content || '';
+      const scoreMatch = aiResponse.match(/score.*?(\d+)/i);
+      
+      if (scoreMatch && scoreMatch[1]) {
+        aiAnalysis = {
+          score: parseInt(scoreMatch[1]),
+          analysis: aiResponse
+        };
+      }
+    } catch (error) {
+      console.error("Error calling OpenAI:", error);
+    }
+  }
+  
+  // Add AI score to the mock data
+  const enhancedPropertyData = {
+    ...mockData,
+    atlasScore: aiAnalysis.score,
+    aiAnalysis: aiAnalysis.analysis
+  };
+  
+  return {
+    success: true,
+    message: 'Property analysis completed (fallback mode)',
+    data: {
+      url,
+      scrapedAt: new Date().toISOString(),
+      propertyDetails: enhancedPropertyData,
+      platform,
+      isFallback: true
+    }
+  };
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { url, searchCriteria } = body;
+    const { url, platform, useMockData } = body;
     
-    // In a real implementation, this would trigger web scraping of the URL with specific criteria
-    // For now, return mock data with the URL embedded
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    if (!url && !useMockData) {
+      return NextResponse.json(
+        { success: false, message: 'URL is required', error: 'Missing URL' },
+        { status: 400 }
+      );
+    }
     
-    return NextResponse.json({
-      success: true,
-      message: 'Web scraping completed',
-      data: {
-        url: url || 'https://example.com/property/listing',
-        scrapedAt: new Date().toISOString(),
-        propertyDetails: {
-          ...mockPropertyData,
-          source: url
-        },
-        searchCriteria: searchCriteria || { priceRange: '$900k-$1.2M', location: 'San Francisco' }
-      }
-    });
-  } catch (error) {
+    console.log(`Processing property analysis for ${platform} URL: ${url}`);
+    
+    // Call our scraper service to analyze the property
+    const result = await analyzePropertyWithScraperService(url, platform, useMockData);
+    
+    return NextResponse.json(result);
+    
+  } catch (error: any) {
+    console.error("API error:", error);
     return NextResponse.json(
       { success: false, message: 'Error processing request', error: String(error) },
-      { status: 400 }
+      { status: 500 }
     );
   }
+}
+
+// Keep the GET method for compatibility
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const propertyAddress = searchParams.get('address');
+  
+  // Simple response for GET requests (for testing)
+  return NextResponse.json({
+    success: true,
+    message: 'Property analysis completed',
+    data: {
+      ...mockSpanishPropertyData,
+      propertyAddress: propertyAddress || mockSpanishPropertyData.propertyAddress,
+      analysisDate: new Date().toISOString(),
+      atlasScore: 85,
+      note: "This is mock data. For real analysis, use POST request with a property URL."
+    }
+  });
 } 
