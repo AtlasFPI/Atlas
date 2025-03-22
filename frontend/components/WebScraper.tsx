@@ -137,7 +137,9 @@ export default function WebScraper() {
         setScraperInfo(`Real property data successfully scraped from ${platform} at ${new Date().toLocaleString()}`);
       }
       
-      setPropertyData(result.data.propertyDetails);
+      // Extract property data, handling both nested and non-nested structures
+      const propertyData = result.data.propertyDetails || result.data;
+      setPropertyData(propertyData);
       setAnalysisStep(5); // Complete
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -194,7 +196,7 @@ export default function WebScraper() {
               </div>
             )}
           </div>
-          <Button type="submit" disabled={loading || (!useMockData && (urlError || !url))} className="bg-blue-600 hover:bg-blue-700">
+          <Button type="submit" disabled={loading || (!useMockData && (urlError !== '' || !url))} className="bg-blue-600 hover:bg-blue-700">
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -333,37 +335,37 @@ export default function WebScraper() {
                   <div className="flex justify-between">
                     <span className="text-slate-600 dark:text-slate-400">Purchase Price:</span>
                     <span className="font-medium text-slate-900 dark:text-white">
-                      €{propertyData.financialMetrics.purchasePrice.toLocaleString()}
+                      €{propertyData.financialMetrics?.purchasePrice?.toLocaleString() || 'N/A'}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600 dark:text-slate-400">Monthly Rent:</span>
                     <span className="font-medium text-slate-900 dark:text-white">
-                      €{propertyData.financialMetrics.estimatedMonthlyRent.toLocaleString()}
+                      €{propertyData.financialMetrics?.estimatedMonthlyRent?.toLocaleString() || 'N/A'}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600 dark:text-slate-400">Net Operating Income:</span>
                     <span className="font-medium text-slate-900 dark:text-white">
-                      €{propertyData.financialMetrics.netOperatingIncome.toLocaleString()}/year
+                      €{propertyData.financialMetrics?.netOperatingIncome?.toLocaleString() || 'N/A'}/year
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600 dark:text-slate-400">Cap Rate:</span>
                     <span className="font-medium text-slate-900 dark:text-white">
-                      {propertyData.financialMetrics.capRate.toFixed(2)}%
+                      {propertyData.financialMetrics?.capRate?.toFixed(2) || 'N/A'}%
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600 dark:text-slate-400">Cash-on-Cash Return:</span>
                     <span className="font-medium text-slate-900 dark:text-white">
-                      {propertyData.financialMetrics.cashOnCashReturn.toFixed(2)}%
+                      {propertyData.financialMetrics?.cashOnCashReturn?.toFixed(2) || 'N/A'}%
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600 dark:text-slate-400">Rental Yield:</span>
                     <span className="font-medium text-slate-900 dark:text-white">
-                      {propertyData.marketTrends.rentalYield.toFixed(2)}%
+                      {propertyData.marketTrends?.rentalYield?.toFixed(2) || 'N/A'}%
                     </span>
                   </div>
                   
@@ -408,32 +410,32 @@ export default function WebScraper() {
                   <div className="flex justify-between">
                     <span className="text-slate-600 dark:text-slate-400">Overall Risk:</span>
                     <span className="font-medium text-slate-900 dark:text-white flex items-center">
-                      {propertyData.riskAssessment.overall}
-                      <div className={`ml-2 w-3 h-3 rounded-full ${getRiskColorClass(propertyData.riskAssessment.overall)}`}></div>
+                      {propertyData.riskAssessment?.overall || 'Unknown'}
+                      <div className={`ml-2 w-3 h-3 rounded-full ${getRiskColorClass(propertyData.riskAssessment?.overall || 'Unknown')}`}></div>
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600 dark:text-slate-400">Walk Score:</span>
                     <span className="font-medium text-slate-900 dark:text-white">
-                      {propertyData.locationAnalysis.walkScore}/100
+                      {propertyData.locationAnalysis?.walkScore || 'N/A'}/100
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600 dark:text-slate-400">Transit Score:</span>
                     <span className="font-medium text-slate-900 dark:text-white">
-                      {propertyData.locationAnalysis.transitScore}/100
+                      {propertyData.locationAnalysis?.transitScore || 'N/A'}/100
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-slate-400">Area Growth:</span>
+                    <span className="text-slate-600 dark:text-slate-400">Area Growth Rate:</span>
                     <span className="font-medium text-slate-900 dark:text-white">
-                      {propertyData.marketTrends.areaGrowth.toFixed(1)}%/year
+                      {propertyData.marketTrends?.areaGrowth?.toFixed(1) || 'N/A'}%/year
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-slate-400">Projected Appreciation:</span>
+                    <span className="text-slate-600 dark:text-slate-400">Appreciation Forecast:</span>
                     <span className="font-medium text-slate-900 dark:text-white">
-                      {propertyData.financialMetrics.appreciationForecast.toFixed(1)}%/year
+                      {propertyData.financialMetrics?.appreciationForecast?.toFixed(1) || 'N/A'}%/year
                     </span>
                   </div>
                 </div>
