@@ -1,4 +1,4 @@
-// File: C:\Users\Davino\Desktop\ProjectAtlasFixed2\frontend\app\dashboard\layout.tsx
+// File: /home/luigif/Documents/Atlas/Atlas/frontend/app/dashboard/layout.tsx
 import * as entry from '../../../../app/dashboard/layout.js'
 import type { ResolvingMetadata } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
