@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import PieChart from '@/components/charts/PieChart';
+import { AlertCircle } from 'lucide-react';
 
 export default function WalletPage() {
   const { 
@@ -19,6 +20,7 @@ export default function WalletPage() {
   
   const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showMetaMaskWarning, setShowMetaMaskWarning] = useState(true);
   
   // Load user tokens when account changes
   useEffect(() => {
@@ -51,35 +53,20 @@ export default function WalletPage() {
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
+  const handleInstallMetaMask = () => {
+    window.open('https://metamask.io/download/', '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-white dark:bg-slate-800 border-b">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <h1 className="text-xl font-bold">Atlas Wallet</h1>
-          <div className="flex items-center gap-4">
-            {isConnected ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500 hidden md:inline">
-                  {account.substring(0, 6)}...{account.substring(account.length - 4)}
-                </span>
-                <Avatar>
-                  <AvatarImage src={`https://avatars.dicebear.com/api/identicon/${account}.svg`} />
-                  <AvatarFallback>WL</AvatarFallback>
-                </Avatar>
-              </div>
-            ) : (
-              <Button onClick={connectWallet}>
-                Connect Wallet
-              </Button>
-            )}
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {error && (
+        <div className="flex justify-between items-center mb-6">
+          {/* Removed Atlas Wallet heading and Connect Wallet button */}
+        </div>
+
+        {/* Only keep non-MetaMask errors */}
+        {error && !error.includes("MetaMask is not installed") && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
           </div>
@@ -89,7 +76,11 @@ export default function WalletPage() {
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold mb-4">Connect Your Wallet</h2>
             <p className="text-gray-500 mb-6">Connect your MetaMask wallet to view your digital property deeds</p>
-            <Button onClick={connectWallet} size="lg">
+            <Button 
+              onClick={connectWallet} 
+              size="lg" 
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md"
+            >
               Connect MetaMask
             </Button>
           </div>
