@@ -1,9 +1,67 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { User, LogOut, LineChart } from 'lucide-react';
+import { useApi } from '@/lib/ApiContext';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
+  const { isAuthenticated, logout } = useApi();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  const handleLoginClick = () => {
+    if (isAuthenticated) {
+      logout();
+    } else {
+      router.push('/dashboard');
+    }
+  };
+  
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 relative">
+      {/* Login/Logout Button */}
+      {mounted && (
+        <div className="absolute top-4 right-4 flex items-center gap-2">
+          {isAuthenticated ? (
+            <>
+              <Link href="/dashboard">
+                <Button 
+                  variant="ghost" 
+                  className="flex items-center gap-2 px-4 py-2 transition-all hover:scale-105 hover:text-primary focus:text-primary active:text-primary hover:bg-primary/10 focus:bg-primary/10 active:bg-primary/10"
+                >
+                  <LineChart className="h-5 w-5" />
+                  <span>Dashboard</span>
+                </Button>
+              </Link>
+              <Button 
+                variant="ghost" 
+                className="flex items-center gap-2 px-4 py-2 transition-all hover:scale-105 hover:text-primary focus:text-primary active:text-primary hover:bg-primary/10 focus:bg-primary/10 active:bg-primary/10"
+                onClick={handleLoginClick}
+              >
+                <LogOut className="h-5 w-5" />
+                <span>Logout</span>
+              </Button>
+            </>
+          ) : (
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2 px-4 py-2 transition-all hover:scale-105 hover:text-primary focus:text-primary active:text-primary hover:bg-primary/10 focus:bg-primary/10 active:bg-primary/10"
+              onClick={handleLoginClick}
+            >
+              <User className="h-5 w-5" />
+              <span>Login</span>
+            </Button>
+          )}
+        </div>
+      )}
+      
       <div className="max-w-5xl w-full text-center">
         <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Project Atlas
@@ -34,14 +92,12 @@ export default function Home() {
           </div>
         </div>
         
-        <div className="flex flex-col md:flex-row gap-4 justify-center">
-          <Link href="/login">
-            <Button className="w-full md:w-auto px-8 py-6 text-lg">
-              Login to Dashboard
-            </Button>
-          </Link>
+        <div className="flex justify-center">
           <Link href="/landing">
-            <Button variant="outline" className="w-full md:w-auto px-8 py-6 text-lg">
+            <Button 
+              variant="outline" 
+              className="px-10 py-6 text-lg transition-all hover:scale-105 hover:text-primary focus:text-primary active:text-primary hover:bg-primary/10 focus:bg-primary/10 active:bg-primary/10 hover:border-primary focus:border-primary active:border-primary touch-manipulation"
+            >
               Learn More
             </Button>
           </Link>
