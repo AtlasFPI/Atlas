@@ -1,27 +1,36 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Token } from '@/types/blockchain';
 import { useBlockchain } from '@/lib/BlockchainContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import PieChart from '@/components/charts/PieChart';
 import { AlertCircle } from 'lucide-react';
 
 export default function WalletPage() {
-  const { 
-    account, 
-    isConnected, 
-    connectWallet, 
-    getUserTokens,
-    error
-  } = useBlockchain();
-  
-  const [tokens, setTokens] = useState([]);
+  const { account, isConnected, connectWallet, getUserTokens, error } =
+    useBlockchain();
+
+  const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState(false);
   const [showMetaMaskWarning, setShowMetaMaskWarning] = useState(true);
-  
+
   // Load user tokens when account changes
   useEffect(() => {
     const loadTokens = async () => {
@@ -31,16 +40,16 @@ export default function WalletPage() {
           const userTokens = await getUserTokens(account);
           setTokens(userTokens);
         } catch (err) {
-          console.error("Error loading tokens:", err);
+          console.error('Error loading tokens:', err);
         } finally {
           setLoading(false);
         }
       }
     };
-    
+
     loadTokens();
   }, [account, isConnected, getUserTokens]);
-  
+
   // Function to generate a random color for 3D token visualization
   const getRandomColor = () => {
     const colors = [
@@ -66,19 +75,21 @@ export default function WalletPage() {
         </div>
 
         {/* Only keep non-MetaMask errors */}
-        {error && !error.includes("MetaMask is not installed") && (
+        {error && !error.includes('MetaMask is not installed') && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
-        
+
         {!isConnected ? (
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold mb-4">Connect Your Wallet</h2>
-            <p className="text-gray-500 mb-6">Connect your MetaMask wallet to view your digital property deeds</p>
-            <Button 
-              onClick={connectWallet} 
-              size="lg" 
+            <p className="text-gray-500 mb-6">
+              Connect your MetaMask wallet to view your digital property deeds
+            </p>
+            <Button
+              onClick={connectWallet}
+              size="lg"
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md"
             >
               Connect MetaMask
@@ -98,11 +109,14 @@ export default function WalletPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-3xl font-bold">
-                    ${tokens.reduce((sum, token) => sum + token.investedAmount, 0).toLocaleString()}
+                    $
+                    {tokens
+                      .reduce((sum, token) => sum + token.investedAmount, 0)
+                      .toLocaleString()}
                   </p>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle>Monthly Income</CardTitle>
@@ -110,7 +124,10 @@ export default function WalletPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-3xl font-bold">
-                    ${tokens.reduce((sum, token) => sum + token.monthlyEarnings, 0).toLocaleString()}
+                    $
+                    {tokens
+                      .reduce((sum, token) => sum + token.monthlyEarnings, 0)
+                      .toLocaleString()}
                   </p>
                 </CardContent>
               </Card>
@@ -121,7 +138,9 @@ export default function WalletPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>My Digital Deeds</CardTitle>
-                    <CardDescription>Blockchain-secured property ownership</CardDescription>
+                    <CardDescription>
+                      Blockchain-secured property ownership
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Table>
@@ -138,11 +157,17 @@ export default function WalletPage() {
                       <TableBody>
                         {tokens.map((token) => (
                           <TableRow key={token.tokenId}>
-                            <TableCell className="font-medium">{token.propertyTitle}</TableCell>
+                            <TableCell className="font-medium">
+                              {token.propertyTitle}
+                            </TableCell>
                             <TableCell>{token.location}</TableCell>
                             <TableCell>{token.percentage}%</TableCell>
-                            <TableCell>${token.investedAmount.toLocaleString()}</TableCell>
-                            <TableCell>${token.monthlyEarnings.toLocaleString()}</TableCell>
+                            <TableCell>
+                              ${token.investedAmount.toLocaleString()}
+                            </TableCell>
+                            <TableCell>
+                              ${token.monthlyEarnings.toLocaleString()}
+                            </TableCell>
                             <TableCell>
                               <span className="text-xs font-mono bg-slate-100 dark:bg-slate-800 p-1 rounded">
                                 {token.tokenId.substring(0, 8)}...
@@ -155,7 +180,7 @@ export default function WalletPage() {
                   </CardContent>
                 </Card>
               </div>
-              
+
               <div>
                 <Card>
                   <CardHeader>
@@ -163,18 +188,18 @@ export default function WalletPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="h-60">
-                      <PieChart 
+                      <PieChart
                         title="Investment Distribution"
-                        labels={tokens.map(token => token.propertyTitle)}
+                        labels={tokens.map((token) => token.propertyTitle)}
                         datasets={[
                           {
                             label: 'Allocation',
-                            data: tokens.map(token => token.investedAmount),
+                            data: tokens.map((token) => token.investedAmount),
                             backgroundColor: [
                               'rgba(54, 162, 235, 0.6)',
                               'rgba(255, 99, 132, 0.6)',
                             ],
-                          }
+                          },
                         ]}
                       />
                     </div>
@@ -191,28 +216,40 @@ export default function WalletPage() {
                   <div className="perspective-1000">
                     <div className="relative transform-style-3d transition-transform duration-700 group-hover:rotate-y-180 w-full h-64">
                       {/* Front of the token */}
-                      <div className={`absolute inset-0 ${getRandomColor()} rounded-xl shadow-xl p-6 backface-hidden`}>
+                      <div
+                        className={`absolute inset-0 ${getRandomColor()} rounded-xl shadow-xl p-6 backface-hidden`}
+                      >
                         <div className="flex flex-col h-full justify-between">
                           <div>
-                            <h3 className="text-xl font-bold text-white">{token.propertyTitle}</h3>
+                            <h3 className="text-xl font-bold text-white">
+                              {token.propertyTitle}
+                            </h3>
                             <p className="text-white/80">{token.location}</p>
                           </div>
-                          
+
                           <div>
                             <div className="flex justify-between mb-2">
                               <span className="text-white/80">Ownership:</span>
-                              <span className="text-white font-bold">{token.percentage}%</span>
+                              <span className="text-white font-bold">
+                                {token.percentage}%
+                              </span>
                             </div>
                             <div className="flex justify-between mb-2">
                               <span className="text-white/80">Value:</span>
-                              <span className="text-white font-bold">${token.investedAmount.toLocaleString()}</span>
+                              <span className="text-white font-bold">
+                                ${token.investedAmount.toLocaleString()}
+                              </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-white/80">Monthly Income:</span>
-                              <span className="text-white font-bold">${token.monthlyEarnings.toLocaleString()}</span>
+                              <span className="text-white/80">
+                                Monthly Income:
+                              </span>
+                              <span className="text-white font-bold">
+                                ${token.monthlyEarnings.toLocaleString()}
+                              </span>
                             </div>
                           </div>
-                          
+
                           <div className="text-center">
                             <span className="text-xs font-mono bg-white/20 p-1 rounded text-white">
                               Token ID: {token.tokenId}
@@ -220,36 +257,59 @@ export default function WalletPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Back of the token */}
                       <div className="absolute inset-0 bg-white dark:bg-slate-800 rounded-xl shadow-xl p-6 backface-hidden rotate-y-180">
                         <div className="flex flex-col h-full justify-between">
                           <div>
-                            <h3 className="text-lg font-bold">Blockchain Details</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Secured on Ethereum</p>
+                            <h3 className="text-lg font-bold">
+                              Blockchain Details
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              Secured on Ethereum
+                            </p>
                           </div>
-                          
+
                           <div className="space-y-3">
                             <div>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">Token Address</p>
-                              <p className="text-sm font-mono break-all">{token.tokenAddress}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">Token ID</p>
-                              <p className="text-sm font-mono">{token.tokenId}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">Owner</p>
-                              <p className="text-sm font-mono">
-                                {account.substring(0, 6)}...{account.substring(account.length - 4)}
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Token Address
+                              </p>
+                              <p className="text-sm font-mono break-all">
+                                {token.tokenAddress}
                               </p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">Standard</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Token ID
+                              </p>
+                              <p className="text-sm font-mono">
+                                {token.tokenId}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Owner
+                              </p>
+                              <p className="text-sm font-mono">
+                                {account
+                                  ? `${account.substring(
+                                      0,
+                                      6
+                                    )}...${account.substring(
+                                      account.length - 4
+                                    )}`
+                                  : 'N/A'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Standard
+                              </p>
                               <p className="text-sm">ERC-721 (NFT)</p>
                             </div>
                           </div>
-                          
+
                           <div className="text-center">
                             <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 p-1 rounded">
                               Hover to flip back

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LineChart from '@/components/charts/LineChart';
 import BarChart from '@/components/charts/BarChart';
 
@@ -62,7 +62,7 @@ export default function AnalyticsPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Portfolio Analytics</h1>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -70,9 +70,18 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="h-80">
-                <LineChart 
+                <LineChart
                   title="Historical & Projected Returns"
-                  labels={['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030']}
+                  labels={[
+                    '2023',
+                    '2024',
+                    '2025',
+                    '2026',
+                    '2027',
+                    '2028',
+                    '2029',
+                    '2030',
+                  ]}
                   datasets={[
                     {
                       label: 'Your Portfolio',
@@ -91,42 +100,48 @@ export default function AnalyticsPage() {
                       data: [0, 4.1, 8.4, 13.0, 17.8, 22.9, 28.3, 34.0],
                       borderColor: 'rgb(255, 99, 132)',
                       backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    }
+                    },
                   ]}
                 />
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Risk Assessment</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-80">
-                <BarChart 
+                <BarChart
                   title="Risk vs. Return Analysis"
-                  labels={userInvestments.map(inv => {
-                    const property = properties.find(p => p.id === inv.propertyId);
-                    return property.title;
+                  labels={userInvestments.map((inv) => {
+                    const property = properties.find(
+                      (p) => p.id === inv.propertyId
+                    );
+                    return property?.title ?? 'Unknown Property';
                   })}
                   datasets={[
                     {
                       label: 'Risk Score (Lower is Better)',
-                      data: userInvestments.map(inv => {
-                        const property = properties.find(p => p.id === inv.propertyId);
-                        return property.riskScore;
+                      data: userInvestments.map((inv) => {
+                        const property = properties.find(
+                          (p) => p.id === inv.propertyId
+                        );
+                        return property?.riskScore ?? 0;
                       }),
                       backgroundColor: 'rgba(255, 99, 132, 0.6)',
                     },
                     {
                       label: 'AI Score (Higher is Better)',
-                      data: userInvestments.map(inv => {
-                        const property = properties.find(p => p.id === inv.propertyId);
-                        return property.aiScore;
+                      data: userInvestments.map((inv) => {
+                        const property = properties.find(
+                          (p) => p.id === inv.propertyId
+                        );
+                        return property?.aiScore ?? 0;
                       }),
                       backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    }
+                    },
                   ]}
                 />
               </div>
@@ -136,4 +151,4 @@ export default function AnalyticsPage() {
       </main>
     </div>
   );
-} 
+}

@@ -1,3 +1,4 @@
+'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -14,24 +15,30 @@ export default function PreloadPage() {
             <span className="text-4xl font-bold text-amber-500">A</span>
           </div>
         </div>
-        <h1 className="text-4xl font-bold mb-4 text-white">
-          Project Atlas
-        </h1>
+        <h1 className="text-4xl font-bold mb-4 text-white">Project Atlas</h1>
         <p className="text-xl text-blue-200 mb-8">
           Tokenized Real Estate Investment
         </p>
         <div className="relative w-64 h-2 mx-auto bg-blue-900 rounded-full overflow-hidden">
           <div className="absolute top-0 left-0 h-full bg-amber-500 animate-progress"></div>
         </div>
-        <p className="mt-4 text-blue-400">Loading investment opportunities...</p>
+        <p className="mt-4 text-blue-400">
+          Loading investment opportunities...
+        </p>
       </div>
 
       {/* Add custom animation to styles/globals.css */}
       <style jsx>{`
         @keyframes progress {
-          0% { width: 0%; }
-          50% { width: 70%; }
-          100% { width: 100%; }
+          0% {
+            width: 0%;
+          }
+          50% {
+            width: 70%;
+          }
+          100% {
+            width: 100%;
+          }
         }
         .animate-progress {
           animation: progress 3s ease-in-out forwards;
@@ -40,25 +47,3 @@ export default function PreloadPage() {
     </main>
   );
 }
-
-// For client-side functionality
-export function PreloadClient() {
-  const router = useRouter();
-  
-  useEffect(() => {
-    // Redirect to landing page after 3 seconds
-    const timer = setTimeout(() => {
-      router.push('/');
-    }, 3000);
-    
-    return () => clearTimeout(timer);
-  }, [router]);
-  
-  return (
-    <PreloadPage />
-  );
-}
-
-// This ensures Next.js knows this is a client component
-"use client";
-export { PreloadClient as default }; 
